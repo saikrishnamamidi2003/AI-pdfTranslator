@@ -1,11 +1,16 @@
 from django.shortcuts import render, redirect
-from django.http import FileResponse
+from django.http import HttpResponse
 from .forms import PDFUploadForm
 from .models import PDFUpload
+
 from googletrans import Translator
-from reportlab.pdfgen import canvas
-import io
 import fitz  # PyMuPDF
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from io import BytesIO
+import os
+
 
 def upload_pdf(request):
     text = None
@@ -17,18 +22,19 @@ def upload_pdf(request):
             pdf = form.save()
             file_path = pdf.file.path
 
+            # Extract text from PDF
             doc = fitz.open(file_path)
             text = ""
             for page in doc:
                 text += page.get_text()
 
+            # Translate the text
             translator = Translator()
             translated = translator.translate(text, src='auto', dest='te')  # Telugu
             translated_text = translated.text
 
-            # If "Download PDF" button was clicked
-            if 'download' in request.POST:
-                return generate_pdf_response(translated_text)
+            # Store in session for download
+            request.session['translated_text'] = translated_text
     else:
         form = PDFUploadForm()
 
@@ -38,17 +44,34 @@ def upload_pdf(request):
         'translated_text': translated_text
     })
 
-def generate_pdf_response(translated_text):
-    buffer = io.BytesIO()
+
+def download_translated_pdf(request):
+    translated_text = request.session.get('translated_text')
+    if not translated_text:
+        return redirect('/')
+
+    buffer = BytesIO()
     p = canvas.Canvas(buffer)
+
+    # Path to font file (adjust if needed)
+    font_path = os.path.join('core', 'static', 'fonts', 'NotoSans-Regular.ttf')
+
+    # Register and set font
+    pdfmetrics.registerFont(TTFont('NotoSans', font_path))
+    p.setFont('NotoSans', 12)
+
     y = 800
     for line in translated_text.split('\n'):
         p.drawString(50, y, line)
         y -= 20
         if y < 50:
             p.showPage()
+            p.setFont('NotoSans', 12)
             y = 800
-    p.showPage()
+
     p.save()
     buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename='translated.pdf')
+
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="translated_output.pdf"'
+    return response

@@ -1,33 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>AI PDF Translator</title>
 </head>
 <body>
-    <h1>Upload a PDF to Translate</h1>
-    
-    <form method="post" enctype="multipart/form-data">
+    <h2>Upload PDF for Translation</h2>
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form }}
+
+        <label for="language">Select Language:</label>
+        <select name="language">
+            <option value="te">Telugu</option>
+            <option value="hi">Hindi</option>
+            <option value="ta">Tamil</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="en">English</option>
+        </select>
+
         <button type="submit">Translate</button>
     </form>
 
-    {% if text %}
-        <h2>Original Text</h2>
-        <pre>{{ text }}</pre>
-    {% endif %}
-
     {% if translated_text %}
-        <h2>Translated Text</h2>
+        <h3>Translated Text:</h3>
         <pre>{{ translated_text }}</pre>
 
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="download" value="yes">
-            <input type="hidden" name="text" value="{{ translated_text }}">
-            <button type="submit">Download Translated PDF</button>
-        </form>
+        <a href="{% url 'download_pdf' %}">
+            <button type="button">Download Translated PDF</button>
+        </a>
     {% endif %}
 </body>
 </html>
