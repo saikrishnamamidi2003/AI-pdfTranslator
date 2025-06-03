@@ -10,13 +10,18 @@
     <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Upload PDF</button>
-</form>
+            <button type="submit">Upload PDF</button>
+        </form>
 
-{% if text %}
-    <h2>Extracted Text:</h2>
-    <pre>{{ text }}</pre>
-{% endif %}
+        {% if text %}
+            <h2>Extracted Text:</h2>
+            <pre>{{ text }}</pre>
+        {% endif %}
+
+        {% if translated_text %}
+            <h2>Translated Text:</h2>
+            <pre>{{ translated_text }}</pre>
+        {% endif %}
 
 </body>
 </html>
