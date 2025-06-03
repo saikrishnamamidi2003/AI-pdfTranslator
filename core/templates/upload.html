@@ -1,27 +1,33 @@
-<!-- core/templates/upload.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Upload PDF</title>
+    <meta charset="UTF-8">
+    <title>AI PDF Translator</title>
 </head>
 <body>
-    <h1>Upload PDF</h1>
+    <h1>Upload a PDF to Translate</h1>
     
     <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-            <button type="submit">Upload PDF</button>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Translate</button>
+    </form>
+
+    {% if text %}
+        <h2>Original Text</h2>
+        <pre>{{ text }}</pre>
+    {% endif %}
+
+    {% if translated_text %}
+        <h2>Translated Text</h2>
+        <pre>{{ translated_text }}</pre>
+
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="download" value="yes">
+            <input type="hidden" name="text" value="{{ translated_text }}">
+            <button type="submit">Download Translated PDF</button>
         </form>
-
-        {% if text %}
-            <h2>Extracted Text:</h2>
-            <pre>{{ text }}</pre>
-        {% endif %}
-
-        {% if translated_text %}
-            <h2>Translated Text:</h2>
-            <pre>{{ translated_text }}</pre>
-        {% endif %}
-
+    {% endif %}
 </body>
 </html>
