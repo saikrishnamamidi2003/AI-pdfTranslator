@@ -1,0 +1,2 @@
+# This file ensures the downloads directory is created and tracked by git
+# The downloads directory is used for storing translated PDF files before download

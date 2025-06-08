@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- How It Works Section -->
+    <div id="howItWorksSection" class="section-content">
+        <div class="text-center mb-5">
+            <h1 class="display-4 text-primary mb-3">
+                <i class="fas fa-language"></i> AI PDF Translator
+            </h1>
+            <p class="lead text-muted">Transform your PDF documents across languages while preserving formatting</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <h4>1. Upload Your PDF</h4>
+                    <p>Simply drag and drop your PDF file or click to browse. We support PDFs up to 16MB in size.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h4>2. Select Languages</h4>
+                    <p>Choose your source language and target language from our selection of 12+ supported languages.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <h4>3. Get Translated PDF</h4>
+                    <p>Our AI-powered system translates your content and generates a new PDF with preserved formatting.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <div class="info-box">
+                    <h5><i class="fas fa-shield-alt text-success"></i> Secure & Private</h5>
+                    <p>Your files are processed securely and deleted after translation. No data is permanently stored.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-box">
+                    <h5><i class="fas fa-bolt text-warning"></i> Fast Processing</h5>
+                    <p>Most documents are translated within seconds using Google's advanced translation API.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <button class="btn btn-primary btn-lg" id="getStartedBtn">
+                <i class="fas fa-arrow-right"></i> Get Started
+            </button>
+        </div>
+    </div>
+
+    <!-- Translate PDF Section -->
+    <div id="translateSection" class="section-content" style="display: none;">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3><i class="fas fa-file-pdf"></i> Translate Your PDF</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data" id="uploadForm">
+                            <!-- File Upload Area -->
+                            <div class="mb-4">
+                                <label class="form-label">Upload PDF File</label>
+                                <input type="file" id="fileInput" name="file" accept=".pdf" required style="display: none;">
+                                <div class="upload-area" id="uploadArea">
+                                    <div class="upload-content">
+                                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                        <h5>Drag & Drop your PDF here</h5>
+                                        <p class="text-muted">or click to browse files</p>
+                                    </div>
+                                    <div class="file-info" id="fileInfo" style="display: none;">
+                                        <i class="fas fa-file-pdf fa-2x text-danger mb-2"></i>
+                                        <p class="file-name mb-1"></p>
+                                        <p class="file-size text-muted"></p>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" id="removeFile">
+                                            <i class="fas fa-times"></i> Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Language Selection -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="sourceLanguage" class="form-label">Source Language</label>
+                                    <select class="form-select" id="sourceLanguage" name="source_language" required>
+                                        <option value="">Select source language</option>
+                                        {% for code, name in languages.items() %}
+                                            <option value="{{ code }}">{{ name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="targetLanguage" class="form-label">Target Language</label>
+                                    <select class="form-select" id="targetLanguage" name="target_language" required>
+                                        <option value="">Select target language</option>
+                                        {% for code, name in languages.items() %}
+                                            <option value="{{ code }}">{{ name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Language Swap Button -->
+                            <div class="text-center mb-4">
+                                <button type="button" class="btn btn-outline-secondary" id="swapLanguages">
+                                    <i class="fas fa-exchange-alt"></i> Swap Languages
+                                </button>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-success btn-lg" id="translateSubmit">
+                                    <i class="fas fa-magic"></i> Translate PDF
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Translation History -->
+                <div class="card mt-4 recent-translations">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-history"></i> Recent Translations</h5>
+                        <a href="{{ url_for('clear_history') }}" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash"></i> Clear History
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% if history %}
+                                {% for item in history %}
+                                <div class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">{{ item.original_filename }}</div>
+                                        <small class="text-muted">{{ languages[item.source_language] }} → {{ languages[item.target_language] }}</small>
+                                        <br><small class="text-muted">{{ item.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                                    </div>
+                                    <a href="{{ url_for('download_file', filename=item.translated_filename) }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-download"></i> Download
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-muted p-3">No recent translations</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
