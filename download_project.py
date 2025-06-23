@@ -4,7 +4,7 @@ Download script to get all project files for local setup
 This script creates a zip file with all necessary components
 """
 
-import os
+import os 
 import zipfile
 import shutil
 from pathlib import Path
