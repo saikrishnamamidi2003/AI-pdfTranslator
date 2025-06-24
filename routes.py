@@ -4,7 +4,7 @@ from flask import render_template, request, redirect, url_for, flash, session, s
 from werkzeug.utils import secure_filename
 from app import app, db
 from models import TranslationHistory
-from pdf_processor import PDFProcessor
+from pdf_processor import PDFProcessor 
 import logging
 
 # Supported languages
